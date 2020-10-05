@@ -3,7 +3,7 @@
 function trending_function() {
   gcloud functions deploy TrendingHTTP --runtime go113 \
   --trigger-http \
-  --entry-point=TrendingHandler \
+  --entry-point=Handler \
   --region=asia-northeast1 \
   --env-vars-file .env.yaml
   # --ingress-settings=internal-only \
