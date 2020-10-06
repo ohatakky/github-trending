@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "expvar"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -26,12 +27,24 @@ func work(job trending.Item) error {
 
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.Host != "github-trending-dot-akki-256705.appspot.com" {
+			w.WriteHeader(http.StatusBadRequest)
+			log.Println(fmt.Sprintf("invalid host: %s", r.Host))
+			return
+		}
+		if r.Header.Get("X-Appengine-Cron") != "true" {
+			w.WriteHeader(http.StatusBadRequest)
+			log.Println(fmt.Sprintf("invalid access: not appengine cron"))
+			return
+		}
+
 		cli := trending.New()
 		items, err := cli.Read()
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Fatal(err)
 		}
+		w.WriteHeader(http.StatusOK)
 
 		wg := &sync.WaitGroup{}
 		wg.Add(worker)
@@ -51,9 +64,8 @@ func main() {
 
 		close(jobs)
 		wg.Wait()
-
-		w.WriteHeader(http.StatusOK)
 	})
 
+	log.Println("running...")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
