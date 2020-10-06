@@ -3,6 +3,7 @@ package main
 import (
 	_ "expvar"
 	"log"
+	"net/http"
 	"os"
 	"sync"
 	"time"
@@ -24,28 +25,35 @@ func work(job trending.Item) error {
 }
 
 func main() {
-	cli := trending.New()
-	items, err := cli.Read()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	wg := &sync.WaitGroup{}
-	wg.Add(worker)
-	jobs := make(chan trending.Item)
-	go func() {
-		defer wg.Done()
-		for j := range jobs {
-			if work(j) != nil {
-				log.Println(err)
-			}
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		cli := trending.New()
+		items, err := cli.Read()
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Fatal(err)
 		}
-	}()
 
-	for _, item := range items {
-		jobs <- *item
-	}
+		wg := &sync.WaitGroup{}
+		wg.Add(worker)
+		jobs := make(chan trending.Item)
+		go func() {
+			defer wg.Done()
+			for j := range jobs {
+				if work(j) != nil {
+					log.Println(err)
+				}
+			}
+		}()
 
-	close(jobs)
-	wg.Wait()
+		for _, item := range items {
+			jobs <- *item
+		}
+
+		close(jobs)
+		wg.Wait()
+
+		w.WriteHeader(http.StatusOK)
+	})
+
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
