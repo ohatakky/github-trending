@@ -13,13 +13,13 @@ import (
 
 const (
 	worker   = 1
-	duration = 3
+	duration = 10
 )
 
 var twitter = tweet.New(os.Getenv("API_KEY"), os.Getenv("API_SECRET"), os.Getenv("ACCESS_TOKEN"), os.Getenv("ACCESS_TOKEN_SECRET"))
 
 func work(job trending.Item) {
-	time.Sleep(duration * time.Second)
+	time.Sleep(duration * time.Minute)
 	err := twitter.Tweet(job.Link)
 	if err != nil {
 		log.Println(err)
