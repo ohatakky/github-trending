@@ -26,6 +26,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			log.Println(err)
 			continue
 		}
-		time.Sleep(10 * time.Minute)
+		time.Sleep(2 * time.Minute)
 	}
 }
