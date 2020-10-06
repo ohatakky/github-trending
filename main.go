@@ -18,12 +18,9 @@ const (
 
 var twitter = tweet.New(os.Getenv("API_KEY"), os.Getenv("API_SECRET"), os.Getenv("ACCESS_TOKEN"), os.Getenv("ACCESS_TOKEN_SECRET"))
 
-func work(job trending.Item) {
+func work(job trending.Item) error {
 	time.Sleep(duration * time.Minute)
-	err := twitter.Tweet(job.Link)
-	if err != nil {
-		log.Println(err)
-	}
+	return twitter.Tweet(job.Link)
 }
 
 func main() {
@@ -39,7 +36,9 @@ func main() {
 	go func() {
 		defer wg.Done()
 		for j := range jobs {
-			work(j)
+			if work(j) != nil {
+				log.Println(err)
+			}
 		}
 	}()
 
