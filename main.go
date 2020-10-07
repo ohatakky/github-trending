@@ -38,7 +38,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	items, err := cli.Read()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Fatalf("fetch trending is failed: %s", err.Error())
+		log.Printf("fetch trending is failed: %s\n", err.Error())
+		return
 	}
 	w.WriteHeader(http.StatusOK)
 
