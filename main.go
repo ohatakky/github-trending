@@ -52,7 +52,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		for j := range jobs {
 			time.Sleep(10 * time.Minute)
 			if twitter.Tweet(j.Link) != nil {
-				log.Println(err)
+				log.Printf("post tweet is failed: %s", err.Error())
 			}
 		}
 	}()
