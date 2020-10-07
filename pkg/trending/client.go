@@ -22,13 +22,13 @@ type Item struct {
 func (*Client) Read() ([]*Item, error) {
 	resp, err := http.Get(endpoint)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	articles := doc.Find("article")
@@ -38,6 +38,7 @@ func (*Client) Read() ([]*Item, error) {
 		a := h1.Find("a").First()
 		link, exist := a.Attr("href")
 		if !exist {
+			log.Println("the html structure has changed")
 			return
 		}
 		items = append(items, &Item{
