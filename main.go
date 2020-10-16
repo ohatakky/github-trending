@@ -1,7 +1,6 @@
 package main
 
 import (
-	_ "expvar"
 	"log"
 	"os"
 	"runtime"
