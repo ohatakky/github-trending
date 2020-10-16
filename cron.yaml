@@ -1,6 +1,0 @@
-cron:
-- description: "daily job"
-  url: /
-  schedule: every day 10:00
-  timezone: Asia/Tokyo
-  target: github-trending
