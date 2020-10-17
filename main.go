@@ -16,21 +16,28 @@ func main() {
 	twitter := tweet.New(os.Getenv("API_KEY"), os.Getenv("API_SECRET"), os.Getenv("ACCESS_TOKEN"), os.Getenv("ACCESS_TOKEN_SECRET"))
 
 	job := func() {
+		log.Println("-------------------- start --------------------")
+		defer func() {
+			log.Println("-------------------- end --------------------")
+		}()
+
 		items, err := cli.Read()
 		if err != nil {
-			log.Fatalf("fetch trending is failed: %s\n", err.Error())
+			log.Printf("fetch trending is failed: %s\n", err.Error())
+			return
 		}
 
 		for _, item := range items {
 			_, err := twitter.Tweet(item.Link)
 			if err != nil {
 				log.Printf("post tweet is failed: %s\n", err.Error())
+				continue
 			}
 
 			time.Sleep(5 * time.Minute)
 		}
 	}
 
-	scheduler.Every().Day().At("9:30").Run(job)
+	scheduler.Every().Day().At("1:10").Run(job)
 	runtime.Goexit()
 }
