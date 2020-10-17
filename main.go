@@ -1,15 +1,40 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"net/http"
 	"os"
-	"runtime"
 	"time"
 
 	"github.com/carlescere/scheduler"
 	"github.com/ohatakky/github-trending/pkg/trending"
 	"github.com/ohatakky/github-trending/pkg/tweet"
 )
+
+func getIP(r *http.Request) string {
+	forwarded := r.Header.Get("X-FORWARDED-FOR")
+	if forwarded != "" {
+		return forwarded
+	}
+	return r.RemoteAddr
+}
+
+func health(w http.ResponseWriter, r *http.Request) {
+	ip := getIP(r)
+	if ip != "0.1.0.1" {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Println(fmt.Sprintf("invalid IP: %s", ip))
+		return
+	}
+	if r.Header.Get("X-Appengine-Cron") != "true" {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Println("invalid access: not appengine cron")
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
 
 func main() {
 	cli := trending.New()
@@ -37,7 +62,10 @@ func main() {
 			time.Sleep(5 * time.Minute)
 		}
 	}
+	scheduler.Every().Day().At("2:30").Run(job)
 
-	scheduler.Every().Day().At("1:10").Run(job)
-	runtime.Goexit()
+	// health check to avoid idle-timeout
+	http.HandleFunc("/health", health)
+	log.Println("running...")
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }

@@ -1,0 +1,6 @@
+cron:
+- description: "Resident Instance"
+  url: /health
+  schedule: every 1 mins
+  timezone: Asia/Tokyo
+  target: github-trending
