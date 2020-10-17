@@ -8,6 +8,11 @@ type Client struct {
 	service *anaconda.TwitterApi
 }
 
+type Tweet struct {
+	Text      string
+	CreatedAt string
+}
+
 func New(consumerKey, consumerSecret, accessToken, accessTokenSecret string) *Client {
 	anaconda.SetConsumerKey(consumerKey)
 	anaconda.SetConsumerSecret(consumerSecret)
@@ -15,7 +20,7 @@ func New(consumerKey, consumerSecret, accessToken, accessTokenSecret string) *Cl
 	return &Client{api}
 }
 
-func (c *Client) Tweet(message string) error {
-	_, err := c.service.PostTweet(message, nil)
-	return err
+func (c *Client) Tweet(message string) (*Tweet, error) {
+	tweet, err := c.service.PostTweet(message, nil)
+	return &Tweet{Text: tweet.Text, CreatedAt: tweet.CreatedAt}, err
 }

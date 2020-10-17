@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 	"runtime"
-	"sync"
 	"time"
 
 	"github.com/carlescere/scheduler"
@@ -13,36 +12,25 @@ import (
 )
 
 func main() {
+	cli := trending.New()
+	twitter := tweet.New(os.Getenv("API_KEY"), os.Getenv("API_SECRET"), os.Getenv("ACCESS_TOKEN"), os.Getenv("ACCESS_TOKEN_SECRET"))
+
 	job := func() {
-		cli := trending.New()
 		items, err := cli.Read()
 		if err != nil {
 			log.Fatalf("fetch trending is failed: %s\n", err.Error())
 		}
 
-		queue := make(chan trending.Item)
-		twitter := tweet.New(os.Getenv("API_KEY"), os.Getenv("API_SECRET"), os.Getenv("ACCESS_TOKEN"), os.Getenv("ACCESS_TOKEN_SECRET"))
-		wg := &sync.WaitGroup{}
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			for item := range queue {
-				if twitter.Tweet(item.Link) != nil {
-					log.Printf("post tweet is failed: %s\n", err.Error())
-				}
-				time.Sleep(4 * time.Minute)
-			}
-		}()
-
 		for _, item := range items {
-			queue <- *item
-		}
+			_, err := twitter.Tweet(item.Link)
+			if err != nil {
+				log.Printf("post tweet is failed: %s\n", err.Error())
+			}
 
-		close(queue)
-		wg.Wait()
+			time.Sleep(5 * time.Minute)
+		}
 	}
 
-	scheduler.Every().Day().At("08:00").Run(job)
-
+	scheduler.Every().Day().At("9:30").Run(job)
 	runtime.Goexit()
 }
