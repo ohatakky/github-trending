@@ -1,13 +1,15 @@
 #!/bin/sh
 
 function all() {
-  gcloud app deploy --appyaml=app.yaml
+  gcloud app deploy cmd/all/app.yaml
 }
 
 function rust() {
-  gcloud app deploy --appyaml=app-rust.yaml
+  gcloud app deploy cmd/rust/app.yaml
 }
 
 function cron() {
   gcloud app deploy cron.yaml
 }
+
+$1
