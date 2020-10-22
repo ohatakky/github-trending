@@ -38,7 +38,7 @@ func health(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	cli := trending.New()
-	twitter := tweet.New(os.Getenv("API_KEY_RUST"), os.Getenv("API_SECRET_RUST"), os.Getenv("ACCESS_TOKEN_RUST"), os.Getenv("ACCESS_TOKEN_SECRET_RUST"))
+	twitter := tweet.New(os.Getenv("API_KEY"), os.Getenv("API_SECRET"), os.Getenv("ACCESS_TOKEN"), os.Getenv("ACCESS_TOKEN_SECRET"))
 
 	job := func() {
 		log.Println("-------------------- start --------------------")
