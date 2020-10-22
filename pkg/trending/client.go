@@ -3,6 +3,8 @@ package trending
 import (
 	"log"
 	"net/http"
+	"net/url"
+	"path"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -17,10 +19,22 @@ func New() *Client {
 
 type Item struct {
 	Link string
+	Text string
 }
 
-func (*Client) Read() ([]*Item, error) {
-	resp, err := http.Get(endpoint)
+func (*Client) Daily(lang string) ([]*Item, error) {
+	u, err := url.Parse(endpoint)
+	if err != nil {
+		return nil, err
+	}
+	if lang != "" {
+		u.Path = path.Join(u.Path, lang)
+	}
+	q := u.Query()
+	q.Set("since", "daily")
+	u.RawQuery = q.Encode()
+
+	resp, err := http.Get(u.String())
 	if err != nil {
 		return nil, err
 	}
@@ -41,8 +55,10 @@ func (*Client) Read() ([]*Item, error) {
 			log.Println("the html structure has changed")
 			return
 		}
+		text := s.Find("p").First().Text()
 		items = append(items, &Item{
 			Link: "https://github.com" + link,
+			Text: text,
 		})
 	})
 

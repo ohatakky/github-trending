@@ -46,14 +46,14 @@ func main() {
 			log.Println("-------------------- end --------------------")
 		}()
 
-		items, err := cli.Read()
+		items, err := cli.Daily("")
 		if err != nil {
 			log.Printf("fetch trending is failed: %s\n", err.Error())
 			return
 		}
 
 		for _, item := range items {
-			_, err := twitter.Tweet(item.Link)
+			_, err := twitter.Tweet(fmt.Sprintf("%s %s", item.Text, item.Link))
 			if err != nil {
 				log.Printf("post tweet is failed: %s\n", err.Error())
 				continue
